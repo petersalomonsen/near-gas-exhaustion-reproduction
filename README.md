@@ -159,6 +159,31 @@ The reproduction requires:
 - Setting up proper token balances and account registrations
 - Configuring the DAO with the exact voting policy from mainnet (requires 3 Approver votes)
 
+## Fix Discovered
+
+We discovered that the gas exhaustion issue can be resolved by using a **named account** instead of an **implicit account** as the proposal creator.
+
+### The Fix
+
+In `fix-failure.js`, we made the following change:
+- **Original**: Used implicit account `dc1b16d8fb55c3dcec0f5f93bb673f4f9e1d3e8df1039004205b79f027539cee` as the proposer
+- **Fixed**: Created a named account `alice.test.near` as the proposer
+
+### Results
+
+With the named account:
+- ✅ Proposal creation succeeds
+- ✅ Voting completes successfully  
+- ✅ Token transfer executes
+- ✅ **No gas exhaustion in the callback**
+- ✅ Transaction completes successfully
+
+### Key Insight
+
+The gas exhaustion only occurs when using implicit accounts (64-character hex addresses) as the proposer. When using named accounts, the same transaction completes successfully without exhausting gas. This suggests that implicit accounts may have different gas consumption patterns or callback handling in the NEAR protocol, particularly when interacting with complex contracts like Sputnik DAO.
+
+This finding indicates that DAOs should consider requiring named accounts for proposal creation to avoid potential gas exhaustion issues.
+
 ## License
 
 MIT
